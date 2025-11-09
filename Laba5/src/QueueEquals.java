@@ -10,15 +10,15 @@ public class QueueEquals {
             throw new IllegalArgumentException("Неверные индексы i и j");
         }
 
-        Queue<T> copy = new LinkedList<>(queue);
+        Queue<T> copy = new LinkedList<>(queue);                            //Двусвязный список
 
         for (int k = 0; k < i; k++) {
-            copy.poll();                                            //1 элемент очереди
+            copy.poll();
         }
 
-        T firstElement = copy.peek();                               //Возвращает 1 элемент и удаляет
+        T firstElement = copy.poll();                                       //1 элемент
 
-        for (int k = i; k <= j; k++) {
+        for (int k = i + 1; k <= j; k++) {
             T current = copy.poll();
             if (!Objects.equals(current, firstElement)) {
                 return false;
