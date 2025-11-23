@@ -3,10 +3,8 @@ import java.util.Objects;
 public final class Fraction implements FractionInterface {
     private int numerator;
     private int denominator;
-    private Double cachedValue;
-    private boolean isCached;
 
-    //Конструкторы
+    // Конструкторы
     public Fraction(int numerator, int denominator) {
         if (denominator == 0) {
             throw new RuntimeException("Знаменатель 0");
@@ -25,8 +23,8 @@ public final class Fraction implements FractionInterface {
         this(number, 1);
     }
 
-    public Fraction(double den) {
-        this((int)(den * 10), 10);
+    public Fraction(double value) {
+        this((int)(value * 10000), 10000);
     }
 
     // Геттеры
@@ -38,20 +36,21 @@ public final class Fraction implements FractionInterface {
         return denominator;
     }
 
+    @Override
     public double getDecimalValue() {
-        if (!isCached || cachedValue == null) {
-            cachedValue = (double) numerator / denominator;
-            isCached = true;
-        }
-        return cachedValue;
+        return FractionCache.getDecimalValue(this.numerator, this.denominator);
     }
 
-    //Сеттеры
+    // Сеттеры
+    @Override
     public void setNumerator(int numerator) {
+        FractionCache.clearCache(this.numerator, this.denominator);
         setValues(numerator, this.denominator);
     }
 
+    @Override
     public void setDenominator(int denominator) {
+        FractionCache.clearCache(this.numerator, this.denominator);
         setValues(this.numerator, denominator);
     }
 
@@ -70,60 +69,34 @@ public final class Fraction implements FractionInterface {
 
         this.numerator = num;
         this.denominator = den;
-        invalidateCache();
     }
 
-    //Сбрасывание кэша
-    private void invalidateCache() {
-        isCached = false;
-        cachedValue = null;
-    }
-
-    //Арифметические действия
-    public Fraction sum(Fraction x) {
-        int newNum = this.numerator * x.denominator + x.numerator * this.denominator;
-        int newDen = this.denominator * x.denominator;
+    // Арифметические действия
+    public Fraction sum(Fraction other) {
+        int newNum = this.numerator * other.denominator + other.numerator * this.denominator;
+        int newDen = this.denominator * other.denominator;
         return new Fraction(newNum, newDen);
     }
 
-    public Fraction sum(double num) {
-        return sum(new Fraction(num));
-    }
-
-    public Fraction minus(Fraction x) {
-        int newNum = this.numerator * x.denominator - x.numerator * this.denominator;
-        int newDen = this.denominator * x.denominator;
+    public Fraction minus(Fraction other) {
+        int newNum = this.numerator * other.denominator - other.numerator * this.denominator;
+        int newDen = this.denominator * other.denominator;
         return new Fraction(newNum, newDen);
     }
 
-    public Fraction minus(int num) {
-        return minus(new Fraction(num));
-    }
-
-    public Fraction multiply(Fraction x) {
-        int newNum = this.numerator * x.numerator;
-        int newDen = this.denominator * x.denominator;
+    public Fraction multiply(Fraction other) {
+        int newNum = this.numerator * other.numerator;
+        int newDen = this.denominator * other.denominator;
         return new Fraction(newNum, newDen);
     }
 
-    public Fraction multiply(int num) {
-        return multiply(new Fraction(num));
-    }
-
-    public Fraction divide(Fraction x) {
-        if (x.denominator == 0) {
-            throw new RuntimeException("Знаменатель 0");
+    public Fraction divide(Fraction other) {
+        if (other.numerator == 0) {
+            throw new RuntimeException("Деление на ноль");
         }
-        int newNum = this.numerator * x.denominator;
-        int newDen = this.denominator * x.numerator;
+        int newNum = this.numerator * other.denominator;
+        int newDen = this.denominator * other.numerator;
         return new Fraction(newNum, newDen);
-    }
-
-    public Fraction divide(int num) {
-        if (num == 0){
-            throw new RuntimeException("Знаменатель 0");
-        }
-        return divide(new Fraction(num));
     }
 
     @Override
