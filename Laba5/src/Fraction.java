@@ -34,7 +34,7 @@ public final class Fraction implements FractionInterface {
 
     @Override
     public double getDecimalValue() {
-        return FractionCache.getDecimalValue(this.numerator, this.denominator);
+        return FractionCache.getDecimalValue(this);
     }
 
     // Сеттеры
