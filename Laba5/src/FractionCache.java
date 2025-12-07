@@ -1,24 +1,16 @@
 public class FractionCache {
-    private static int lastNumerator;
-    private static int lastDenominator;
-    private static double lastValue;
-    private static boolean hasCache;
+    private static Fraction cachedFraction = null;
+    private static double cachedValue = 0.0;
 
-    public static double getDecimalValue(int numerator, int denominator) {
-        if (hasCache && lastNumerator == numerator && lastDenominator == denominator) {
-            return lastValue;
+    public static double getDecimalValue(Fraction fraction) {
+        if (fraction.equals(cachedFraction)) {
+            return cachedValue;
         }
 
-        lastValue = (double) numerator / denominator;
-        lastNumerator = numerator;
-        lastDenominator = denominator;
-        hasCache = true;
-        return lastValue;
-    }
+        double value = (double) fraction.getNumerator() / fraction.getDenominator();
+        cachedFraction = fraction;
+        cachedValue = value;
 
-    public static void clearCache(int numerator, int denominator) {
-        if (hasCache && lastNumerator == numerator && lastDenominator == denominator) {
-            hasCache = false;
-        }
+        return value;
     }
 }
