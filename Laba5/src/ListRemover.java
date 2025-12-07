@@ -3,17 +3,17 @@ import java.util.List;
 import java.util.Objects;
 
 public class ListRemover {
-    //Удаление строки
-    public int removeString(List<String> list, String valueToRemove) {
+    //Метод для удаления элементов любого типа
+    public <T> int removeValue(List<T> list, T valueToRemove) {
         if (list == null || valueToRemove == null) {
             return 0;
         }
 
         int removedCount = 0;
-        Iterator<String> iterator = list.iterator();
+        Iterator<T> iterator = list.iterator();
 
         while (iterator.hasNext()) {
-            String element = iterator.next();
+            T element = iterator.next();
             if (Objects.equals(element, valueToRemove)) {
                 iterator.remove();
                 removedCount++;
