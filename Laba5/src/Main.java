@@ -31,7 +31,6 @@ public class Main {
             switch (TaskNum) {
                 case 1:
                     System.out.println("1 Задание");
-                    System.out.println("Создание дроби с кэшированием:");
 
                     System.out.print("Введите числитель: ");
                     String numStr = scanner.nextLine();
@@ -54,11 +53,9 @@ public class Main {
                         break;
                     }
 
-                    FractionInterface fraction = new Fraction(numerator, denominator);
+                    Fraction fraction = new Fraction(numerator, denominator);
                     System.out.println("Создана дробь: " + fraction);
-
-                    System.out.println("Демонстрация кэширования вещественного значения:");
-                    System.out.println("Вызов getDecimalValue(): " + fraction.getDecimalValue());
+                    System.out.println("Десятичное значение: " + fraction.getDecimalValue());
 
                     System.out.println("Изменение дроби:");
                     System.out.print("Введите новый числитель: ");
@@ -68,9 +65,37 @@ public class Main {
                         break;
                     }
                     int newNumerator = Integer.parseInt(newNumStr);
+
+                    System.out.print("Введите новый знаменатель: ");
+                    String newDenStr = scanner.nextLine();
+                    if (!valid.isInteger(newDenStr)) {
+                        System.out.println("Ошибка: знаменатель должен быть целым числом");
+                        break;
+                    }
+                    int newDenominator = Integer.parseInt(newDenStr);
+
+                    if (newDenominator == 0) {
+                        System.out.println("Ошибка: знаменатель не может быть нулем");
+                        break;
+                    }
+
+                    int oldNumerator = fraction.getNumerator();
+                    int oldDenominator = fraction.getDenominator();
+
+                    // Изменяем и числитель, и знаменатель
                     fraction.setNumerator(newNumerator);
+                    fraction.setDenominator(newDenominator);
                     System.out.println("Дробь после изменения: " + fraction);
-                    System.out.println("Вызов getDecimalValue(): " + fraction.getDecimalValue());
+
+                    System.out.println("Десятичное значение после изменения: " + fraction.getDecimalValue());
+
+                    System.out.println("Демонстрация кэширования двух дробей:");
+
+                    Fraction oldFraction = new Fraction(oldNumerator, oldDenominator);
+                    Fraction newFraction = new Fraction(newNumerator, newDenominator);
+                    System.out.println("Старая дробь " + oldFraction + ": " + oldFraction.getDecimalValue());
+                    System.out.println("Новая дробь " + newFraction + ": " + newFraction.getDecimalValue());
+
                     break;
 
                 case 2:
@@ -98,13 +123,13 @@ public class Main {
 
                     System.out.print("Сколько элементов добавить в список? ");
                     String count3Str = scanner.nextLine();
-                    if (!valid.isPositiveInteger(count3Str)) {
-                        System.out.println("Ошибка: количество должно быть неотрицательным целым числом");
+                    if (!valid.isNaturalNumber(count3Str)) {
+                        System.out.println("Ошибка: количество должно быть натуральным числом");
                         break;
                     }
                     int count3 = Integer.parseInt(count3Str);
 
-                    List<String> list = new ArrayList<>();
+                    List<Object> list = new ArrayList<>();
                     for (int i = 0; i < count3; i++) {
                         System.out.print("Введите элемент " + (i + 1) + ": ");
                         list.add(scanner.nextLine());
@@ -115,8 +140,8 @@ public class Main {
                     System.out.print("Введите значение для удаления: ");
                     String valueToRemove = scanner.nextLine();
 
-                    List<String> list1 = new ArrayList<>(list);
-                    int removed1 = remover.removeString(list1, valueToRemove);
+                    List<Object> list1 = new ArrayList<>(list);
+                    int removed1 = remover.removeValue(list1, valueToRemove);
                     System.out.println("Удалено элементов: " + removed1);
                     System.out.println("Список после удаления: " + list1);
 
@@ -143,85 +168,103 @@ public class Main {
 
                     break;
                 case 4:
-                    System.out.println("4 Задание - Олимпиада (чтение из файла)");
+                    System.out.println("4 Задание");
 
                     String filename = "a.txt";
+                    Olympiad olympiad = new Olympiad();
 
                     try {
+                        // Читаем все строки из файла
                         List<String> lines = Files.readAllLines(Paths.get(filename));
+
                         if (lines.isEmpty()) {
                             System.out.println("Файл пуст");
-                            break;
+                            return;
                         }
 
+                        // Первая строка - количество участников
                         String firstLine = lines.getFirst().trim();
-                        if (!valid.isPositiveInteger(firstLine)) {
+                        int n;
+
+                        try {
+                            n = Integer.parseInt(firstLine);
+                        } catch (NumberFormatException e) {
                             System.out.println("Ошибка: первая строка должна содержать количество участников");
-                            break;
+                            return;
                         }
 
-                        int n = Integer.parseInt(firstLine);
-                        if (n <= 0 || n > 250) {
+                        // Проверяем ограничение (1-250 участников)
+                        if (n < 1 || n > 250) {
                             System.out.println("Ошибка: количество участников должно быть от 1 до 250");
-                            break;
+                            return;
                         }
 
+                        // Проверяем, что в файле достаточно строк
                         if (lines.size() < n + 1) {
                             System.out.println("Ошибка: в файле недостаточно строк данных");
-                            break;
+                            return;
                         }
 
-                        Olympiad olympiad = new Olympiad();
+                        // Обрабатываем данные участников
+                        int processedCount = 0;
 
-                        for (int i = 1; i <= n; i++) {
+                        for (int i = 1; i <= n && i < lines.size(); i++) {
                             String line = lines.get(i).trim();
-                            String[] parts = line.split(" ");
 
+                            if (line.isEmpty()) {
+                                continue; // Пропускаем пустые строки
+                            }
+
+                            String[] parts = line.split("\\s+");
+
+                            // Проверяем формат строки
                             if (parts.length != 5) {
-                                System.out.println("Строка " + i + ": неверное количество данных - " + line);
+                                System.out.println("Строка " + i + ": неверный формат - " + line);
                                 continue;
                             }
 
-                            if (!valid.isInteger(parts[2]) || !valid.isInteger(parts[3]) || !valid.isInteger(parts[4])) {
+                            try {
+                                String lastName = parts[0];
+                                String firstName = parts[1];
+                                int score1 = Integer.parseInt(parts[2]);
+                                int score2 = Integer.parseInt(parts[3]);
+                                int score3 = Integer.parseInt(parts[4]);
+
+                                // Проверяем диапазон баллов (0-25)
+                                if (score1 < 0 || score1 > 25 ||
+                                        score2 < 0 || score2 > 25 ||
+                                        score3 < 0 || score3 > 25) {
+                                    System.out.println("Строка " + i + ": баллы должны быть от 0 до 25 - " + line);
+                                    continue;
+                                }
+
+                                // Добавляем участника
+                                olympiad.addParticipant(lastName, firstName, score1, score2, score3);
+                                processedCount++;
+
+                            } catch (NumberFormatException e) {
                                 System.out.println("Строка " + i + ": баллы должны быть целыми числами - " + line);
-                                continue;
                             }
-
-                            String lastName = parts[0];
-                            String firstName = parts[1];
-                            int s1 = Integer.parseInt(parts[2]);
-                            int s2 = Integer.parseInt(parts[3]);
-                            int s3 = Integer.parseInt(parts[4]);
-
-                            if (s1 < 0 || s1 > 25 || s2 < 0 || s2 > 25 || s3 < 0 || s3 > 25) {
-                                System.out.println("Строка " + i + ": баллы должны быть от 0 до 25 - " + line);
-                                continue;
-                            }
-
-                            olympiad.addParticipant(lastName, firstName, s1, s2, s3);
                         }
 
-                        if (olympiad.getParticipantsCount() == 0) {
-                            System.out.println("Нет корректных данных для обработки");
-                            break;
-                        }
+                        System.out.println("Максимальный балл: " + olympiad.getMaxTotalScore());
+                        System.out.println("Победитель:");
 
-                        List<Integer> winners = olympiad.findBest();
+                        String winners = olympiad.getWinners();
                         if (winners.isEmpty()) {
                             System.out.println("Нет победителей");
                         } else {
-                            System.out.println("Максимальный балл: " + olympiad.getMaxTotalScore());
-                            for (int winnerIndex : winners) {
-                                System.out.println("• " + olympiad.getLastName(winnerIndex) + " " + olympiad.getFirstName(winnerIndex) +
-                                        " - " + olympiad.getTotalScore(winnerIndex) + " баллов");
+                            String[] winnerArray = winners.split("\n");
+                            for (String winner : winnerArray) {
+                                System.out.println("• " + winner);
                             }
-                            System.out.println("Всего победителей: " + winners.size());
+                            System.out.println("Всего победителей: " + winnerArray.length);
                         }
 
                     } catch (IOException e) {
                         System.out.println("Ошибка чтения файла: " + e.getMessage());
                     } catch (Exception e) {
-                        System.out.println("Ошибка: " + e.getMessage());
+                        System.out.println("Неожиданная ошибка: " + e.getMessage());
                     }
                     break;
 
