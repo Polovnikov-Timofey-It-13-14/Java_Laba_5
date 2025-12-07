@@ -8,27 +8,33 @@ public class FindLetters {
         String text = readFile(filename);
         String[] words = text.split("[^а-яёА-ЯЁ]+");
 
-        Map<Character, Integer> consonantCount = new HashMap<>();
+        Set<Character> allConsonants = new HashSet<>();
+        Set<Character> duplicateConsonants = new HashSet<>();
 
         for (String word : words) {
-            if (word.isEmpty()) continue;
-
+            if (word.isEmpty()) {
+                continue;
+            }
             Set<Character> wordConsonants = new HashSet<>();
             for (char c : word.toCharArray()) {
                 if (valid.isRussianConsonant(c)) {
-                    wordConsonants.add(Character.toLowerCase(c));
+                    char lowerC = Character.toLowerCase(c);
+                    wordConsonants.add(lowerC);
                 }
             }
 
             for (char consonant : wordConsonants) {
-                consonantCount.put(consonant, consonantCount.getOrDefault(consonant, 0) + 1);
+                if (allConsonants.contains(consonant)) {
+                    duplicateConsonants.add(consonant);
+                }
+                allConsonants.add(consonant);
             }
         }
 
-        Set<Character> result = new TreeSet<>();                                                        //Автоматически сортирует
-        for (Map.Entry<Character, Integer> entry : consonantCount.entrySet()) {
-            if (entry.getValue() == 1) {
-                result.add(entry.getKey());
+        Set<Character> result = new TreeSet<>();
+        for (char consonant : allConsonants) {
+            if (!duplicateConsonants.contains(consonant)) {
+                result.add(consonant);
             }
         }
         return result;
