@@ -23,10 +23,6 @@ public final class Fraction implements FractionInterface {
         this(number, 1);
     }
 
-    public Fraction(double value) {
-        this((int)(value * 10000), 10000);
-    }
-
     // Геттеры
     public int getNumerator() {
         return numerator;
@@ -44,15 +40,14 @@ public final class Fraction implements FractionInterface {
     // Сеттеры
     @Override
     public void setNumerator(int numerator) {
-        FractionCache.clearCache(this.numerator, this.denominator);
         setValues(numerator, this.denominator);
     }
 
     @Override
     public void setDenominator(int denominator) {
-        FractionCache.clearCache(this.numerator, this.denominator);
         setValues(this.numerator, denominator);
     }
+
 
     private void setValues(int numerator, int denominator) {
         if (denominator == 0) {
